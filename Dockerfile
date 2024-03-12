@@ -2,6 +2,7 @@ FROM python:3.12.2-slim-bookworm
  ENV PYVERSION 3.12
 ENV WEBLATE_VERSION 5.4.2
 ENV WEBLATE_EXTRAS all,MySQL,zxcvbn,test
+ENV WEBLATE_DOCKER_GIT_REVISION c13360c7955518489a5756c90077aa3aca12005e
 ARG TARGETARCH
 
 LABEL name="Weblate"
@@ -118,7 +119,6 @@ RUN \
         -r /app/src/requirements.txt \
         "https://github.com/translate/translate/archive/master.zip" \
         "https://github.com/WeblateOrg/language-data/archive/main.zip" \
-        "https://github.com/WeblateOrg/weblate/archive/$WEBLATE_DOCKER_GIT_REVISION.zip#egg=Weblate[$WEBLATE_EXTRAS]" \
         ;; \
     * ) \
       pip install \
@@ -127,6 +127,13 @@ RUN \
         "Weblate[$WEBLATE_EXTRAS]==$WEBLATE_VERSION" \
       ;; \
   esac \
+  && pip uninstall Weblate --yes \
+  && git clone https://github.com/TSKModding/weblate.git weblate-src \
+  && cd weblate-src \
+  && git checkout $WEBLATE_DOCKER_GIT_REVISION \
+  && python setup.py install \
+  && cd .. \
+  && rm -rf weblate-src \
   && python -c 'from phply.phpparse import make_parser; make_parser()' \
   && ln -s /usr/local/share/weblate/examples/ /app/ \
   && apt-get -y purge \
