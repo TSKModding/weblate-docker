@@ -131,6 +131,7 @@ RUN \
   && git clone https://github.com/TSKModding/weblate.git weblate-src \
   && cd weblate-src \
   && git checkout $WEBLATE_DOCKER_GIT_REVISION \
+  && python setup.py build \
   && python setup.py install \
   && cd .. \
   && rm -rf weblate-src \
